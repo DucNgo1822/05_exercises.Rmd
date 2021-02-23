@@ -12,7 +12,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
@@ -134,13 +134,14 @@ departure_trips <- drop_na(small_trains) %>%
   filter(year == 2017) %>% 
   group_by(month, departure_station) %>% 
   summarise(month_trip = sum(total_num_trips)) %>% 
-  top_n(n = 5, wt = month_trip) %>%  
+  top_n(n = 10, wt = month_trip) %>%  
   arrange(month, month_trip) %>% 
   mutate(rank = 1: n()) %>% 
   ggplot(aes(y = factor(rank), x = month_trip,
              fill = departure_station)) + 
   geom_col() + 
-  geom_text(aes(label = departure_station)) + 
+  geom_text(aes(label = departure_station), 
+            color = "black", hjust = "left", x = -10) + 
   labs(title = "Change in trips per month in 2017",
        subtitle = "Month: {frame_time}",
        x = "",
@@ -162,7 +163,6 @@ anim_save("departure_race.gif")
 ```{r, echo= FALSE}
 knitr::include_graphics("departure_race.gif")
 ```
-
 
 ## Garden data
 
@@ -261,6 +261,8 @@ anim_save("mallorca_biking_with_bike.gif")
 knitr::include_graphics("mallorca_biking_with_bike.gif")
 ```
 
+In here, I like the animation map better as it shows the path over time of the journey. I could see the changes much clearer as well as see when the rider cross certain point in the map. 
+
   5. In this exercise, you get to meet my sister, Heather! She is a proud Mac grad, currently works as a Data Scientist at 3M where she uses R everyday, and for a few years (while still holding a full-time job) she was a pro triathlete. You are going to map one of her races. The data from each discipline of the Ironman 70.3 Pan Am championships, Panama is in a separate file - `panama_swim`, `panama_bike`, and `panama_run`. Create a similar map to the one you created with my cycling data. You will need to make some small changes: 1. combine the files (HINT: `bind_rows()`, 2. make the leading dot a different color depending on the event (for an extra challenge, make it a different image using `geom_image()!), 3. CHALLENGE (optional): color by speed, which you will need to compute on your own from the data. You can read Heather's race report [here](https://heatherlendway.com/2016/02/10/ironman-70-3-pan-american-championships-panama-race-report/). She is also in the Macalester Athletics [Hall of Fame](https://athletics.macalester.edu/honors/hall-of-fame/heather-lendway/184) and still has records at the pool. 
   
 ```{r}
@@ -326,19 +328,14 @@ knitr::include_graphics("panama_all.gif")
   * Animate the plot to reveal the pattern by date. Display the date as the subtitle. Add a leading point to each state's line (`geom_point()`) and add the state name as a label (`geom_text()` - you should look at the `check_overlap` argument).  
   * Use the `animate()` function to have 200 frames in your animation and make it 30 seconds long. 
   * Comment on what you observe.
-  
-  
-  ### Add a leading point to each state's line (`geom_point()`)
-  
+
 ```{r}
 lag_one_week <- covid19 %>%
   group_by(state) %>%
   mutate(seven_day_lag = replace_na(lag(cases,7, order_by = date), 0))%>%
   ungroup() %>% 
   filter(cases >= 20) %>% 
-  mutate(new_cases_past_week = cases - seven_day_lag,
-         state = fct_reorder(state, cases)) %>% 
-  group_by(state) 
+  mutate(new_cases_past_week = cases - seven_day_lag)
 ```
 
 ```{r, eval= FALSE}
@@ -347,7 +344,8 @@ covid_trajectory <- lag_one_week %>%
              group = state, color = state)) + 
   geom_path() + 
   geom_text(aes(label = state), 
-            check_overlap = TRUE) + 
+            check_overlap = TRUE) +
+  geom_point(aes(color = state)) + 
   scale_x_log10(labels = scales::comma) + 
   scale_y_log10(labels = scales::comma) + 
   labs(x = "Total cases", 
@@ -366,6 +364,8 @@ anim_save("covid_in_states.gif")
 ```{r}
 knitr::include_graphics("covid_in_states.gif")
 ```
+
+In here, even though we have a lot of data for different states, I can clearly see the rise of COVID-19 cases in New York from the beginning of the period. After a while, in April or May, the trend for New York started to decline, while California, Texas or Florida saw rising cases. It shows the changes in the total number of COVID cases in the country. 
 
   7. In this exercise you will animate a map of the US, showing how cumulative COVID-19 cases per 10,000 residents has changed over time. This is similar to exercises 11 & 12 from the previous exercises, with the added animation! So, in the end, you should have something like the static map you made there, but animated over all the days. The code below gives the population estimates for each state and loads the `states_map` data. Here is a list of details you should include in the plot:
   
@@ -423,6 +423,7 @@ anim_save("covid_changes_in_states.gif")
 knitr::include_graphics("covid_changes_in_states.gif")
 ```
 
+From the graph, we can see that from the beginning, it only starts with Washington. Then, the coronavirus has spread all over the country, as we have seen much higher proportion of cases per 10000 people. From the beginning, a few areas have cases per 10000 people larger than 1250, while now, lots of states have seen these figures. 
 
 ## Your first `shiny` app (for next week!)
 
@@ -434,5 +435,6 @@ NOT DUE THIS WEEK! If any of you want to work ahead, this will be on next week's
 
   9. Below, provide a link to your GitHub page with this set of Weekly Exercises. Specifically, if the name of the file is 05_exercises.Rmd, provide a link to the 05_exercises.md file, which is the one that will be most readable on GitHub. If that file isn't very readable, then provide a link to your main GitHub page.
 
+https://github.com/DucNgo1822/05_exercises.Rmd
 
 **DID YOU REMEMBER TO UNCOMMENT THE OPTIONS AT THE TOP?**
